@@ -1,0 +1,8 @@
+<messagebundle>
+  <msg name="Add">Add</msg>
+  <msg name="yourreminders">Your Reminders</msg>
+  <msg name="version">version</msg>
+  <msg name="daysuntil">Days Until</msg>
+  <msg name="countdown">Countdown</msg>
+  <msg name="daysuntil_description">How long till that birthday or holiday? Or how long until that cool new thing comes out? Keep track with the Days Until Countdown</msg>
+</messagebundle>
