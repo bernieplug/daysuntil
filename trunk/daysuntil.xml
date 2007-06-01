@@ -15,7 +15,7 @@
 	thumbnail="http://daysuntil.googlecode.com/svn/trunk/daysuntil_thumbnail.png"
 	author_photo="http://daysuntil.googlecode.com/svn/trunk/author_photo.png"
 	author_aboutme="Software developer and entrepreneur. Look me up to talk about your next project."
-	author_quote="Time. time. time.  Look what's become of me."
+	author_quote="We can never know about the days to come. But we think about them anyway...Anticipation. - Carly"
 	author_link="http://leancode.com/"
 >
 	<Locale messages="http://daysuntil.googlecode.com/svn/trunk/ALL_ALL.xml"/>
@@ -152,9 +152,9 @@
 			"<td class=description_td__MODULE_ID__><span class=description_ds__MODULE_ID__>" +
 			_hesc(description) +
 			"</span></td>" +
-			"<td class=date_display__MODULE_ID__><span class=date_display__MODULE_ID__>" + 
+			"<td class=date_display__MODULE_ID__><div class=date_display__MODULE_ID__>" + 
 			daysuntil +
-			"</span></td>" +
+			"</div></td>" +
 			"<td>" +
 			createDelete__MODULE_ID__(number) +
 			"</td>" +
@@ -210,15 +210,16 @@
 		padding: 0 5px 0 5px;
 	}
 	
-	span.date_display__MODULE_ID__ {
+	div.date_display__MODULE_ID__ {
 		border: 2px solid #003300;
-		background-color: #00FF33;
+		background-color: #33FF66;
 		color: #003300;
 		font-family: arial, san-serif;
 		font-size: normal;
 		font-weight: bold;
 		padding: 0px 2px 0px 2px;
-		margin: 0 auto;
+		margin: 0 2px;
+		float: right;
 	}
 	
 	img.delete__MODULE_ID__ {
@@ -250,7 +251,7 @@
 	newMonth__MODULE_ID__.value,
 	document.newReminderForm__MODULE_ID__.
 	newDay__MODULE_ID__.value
-	)"> <input size="16" id="newDescription__MODULE_ID__" type="text"
+	)"> <input size="12" id="newDescription__MODULE_ID__" type="text"
 		/> <input size="4" id="newYear__MODULE_ID__" 
 		value="" type="text"> <input size="2" id="newMonth__MODULE_ID__" 
 		value="" type="text"> <input size="2" id="newDay__MODULE_ID__" 
