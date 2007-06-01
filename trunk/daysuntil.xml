@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Module>
 <ModulePrefs 
-	title="__UP_daysuntil__"
+	title="__MSG_daysuntil__"
 	title_url="http://leancode.com/daysuntil/"
 	directory_title="__MSG_daysuntil__ __MSG_countdown__"
-	description="__UP_daysuntil_description__"
+	description="__MSG_daysuntil_description__"
 	scrolling="false"
 	singleton="false"
 	author="Bernie T."
@@ -23,8 +23,8 @@
 	<Require feature="setprefs"/>
 	<Require feature="dynamic-height"/>
 </ModulePrefs>
-<UserPref name="reminders" display_name="__UP_yourreminders__" datatype="string" default_value="[]"></UserPref>
-<UserPref name="version" display_name="__UP_daysuntil_ __UP_version__" datatype="string" default_value=" $Rev$ "></UserPref>
+<UserPref name="reminders" display_name="__MSG_yourreminders__" datatype="string" default_value="[]"></UserPref>
+<UserPref name="version" display_name="__MSG_daysuntil_ __MSG_version__" datatype="string" default_value=" $Rev$ "></UserPref>
 <Content type="html">
 <![CDATA[
 
@@ -193,7 +193,7 @@
 	}
 	
 	td.date_display__MODULE_ID__ {
-		text-align: center;
+		text-align: right;
 		padding 0px 2px 0px 2px;
 	}
 	
