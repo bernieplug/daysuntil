@@ -34,7 +34,8 @@
 	
 	var reminders__MODULE_ID__; // This is a json object of reminders (array of hashes with 'name' & 'date')
 	var prefs__MODULE_ID__;
-	var minutes = 1000*60;
+	var seconds = 1000;
+	var minutes = seconds*60;
 	var hours = minutes*60;
 	var days = hours*24;
 	var years = days*365;
@@ -57,6 +58,7 @@
 			    });
 		}
 		
+		reminders__MODULE_ID__.sort(sortRemindersAscending);
 		resetForm__MODULE_ID__();
 		createTable__MODULE_ID__();
 	}
@@ -64,6 +66,39 @@
 	function saveReminders__MODULE_ID__(){
 		prefs__MODULE_ID__.set("reminders", reminders__MODULE_ID__.toJSONString());
 		loadReminders__MODULE_ID__();
+	}
+	
+	// a,b must be reminders (which have hashed 'name' and 'date' keys)
+	function sortRemindersAscending(a,b) {
+		var x = calendarDaysUntil(a.date);
+		var y = calendarDaysUntil(b.date);
+		
+		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
+	}
+	
+	// returns integer with calendar days until the endDate
+	// (from the today's prior midnight, until the prior midnight of endDate)
+	// endDate is a Date object
+	// moves the year, if necessary, to insure that the date is in the future
+	function calendarDaysUntil(endDate) {
+		var nowDate = new Date();
+		
+		// Roll clocks back to midnight
+		var endDay = new Date(endDate.getYear(), endDate.getMonth(), endDate.getDate());
+		var nowDay = new Date(nowDate.getYear(), nowDate.getMonth(), nowDate.getDate());
+		
+		if (endDay.getTime() < nowDay.getTime()) {
+			// use date functions to avoid extra leap days, etc.
+			endDay.setFullYear(nowDay.getFullYear());
+			
+			// if endDay is in the past year to date, still
+			// need to go forward one additional year
+			if (endDay.getTime() < nowDay.getTime()) {
+				endDay.setFullYear(nowDay.getFullYear()+1);
+			}
+		}
+		
+		return Math.ceil((endDay.getTime()-nowDay.getTime())/days);
 	}
 	
 	function resetForm__MODULE_ID__() {
@@ -123,23 +158,6 @@
 		html = html + "</table>";
 		_gel("remindersDiv__MODULE_ID__").innerHTML = html;
 		_IG_AdjustIFrameHeight();
-	}
-	
-	// returns integer with calendar days until the endDate
-	// (from the today's prior midnight, until the prior midnight of endDate)
-	// endDate is a Date object
-	// moves the year, if necessary, to insure that the date is in the future
-	function calendarDaysUntil(endDate) {
-		var now = new Date();
-		
-		if (endDate < now) {
-			endDate.setFullYear(now.getFullYear());
-		}
-		if (endDate < now) {
-			endDate.setFullYear(now.getFullYear()+1);
-		}
-		
-		return Math.floor(endDate.getTime()/days) - Math.floor(now.getTime()/days);
 	}
 
 	function createRow__MODULE_ID__(number, description, reminder_date) {
