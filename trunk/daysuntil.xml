@@ -3,7 +3,7 @@
 <ModulePrefs 
 	title="__MSG_daysuntil__"
 	title_url="http://leancode.com/daysuntil/"
-	directory_title="__MSG_daysuntil__ __MSG_countdown__"
+	directory_title="__MSG_daysuntilcountdown__"
 	description="__MSG_description__"
 	scrolling="false"
 	singleton="false"

@@ -3,6 +3,6 @@
   <msg name="yourreminders">Your Reminders</msg>
   <msg name="version">version</msg>
   <msg name="daysuntil">Days Until</msg>
-  <msg name="countdown">Countdown</msg>
+  <msg name="daysuntilcountdown">Days Until Countdown</msg>
   <msg name="description">How long till that birthday or holiday? Or how long until that cool new thing comes out? Use this as a type of time management tool, reminder, or countdown timer.</msg>
 </messagebundle>
