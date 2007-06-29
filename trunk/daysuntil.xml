@@ -65,7 +65,7 @@
 
 	function saveReminders__MODULE_ID__(){
 		prefs__MODULE_ID__.set("reminders", reminders__MODULE_ID__.toJSONString());
-		loadReminders__MODULE_ID__();
+		//loadReminders__MODULE_ID__();
 	}
 	
 	// a,b must be reminders (which have hashed 'name' and 'date' keys)
@@ -269,21 +269,12 @@
 	newMonth__MODULE_ID__.value,
 	document.newReminderForm__MODULE_ID__.
 	newDay__MODULE_ID__.value
-	)"> <input size="12" id="newDescription__MODULE_ID__" type="text"
+	)"> <input size="8" id="newDescription__MODULE_ID__" type="text"
 		/> <input size="4" id="newYear__MODULE_ID__" 
 		value="" type="text"> <input size="2" id="newMonth__MODULE_ID__" 
 		value="" type="text"> <input size="2" id="newDay__MODULE_ID__" 
-		value="" type="text"> <input type='button' value="__MSG_Add__"
-		onclick = "javascript:addReminder__MODULE_ID__(
-		document.newReminderForm__MODULE_ID__.
-		newDescription__MODULE_ID__.value,
-		document.newReminderForm__MODULE_ID__.
-		newYear__MODULE_ID__.value,
-		document.newReminderForm__MODULE_ID__.
-		newMonth__MODULE_ID__.value,
-		document.newReminderForm__MODULE_ID__.
-		newDay__MODULE_ID__.value
-		)" />
+		value="" type="text"> <input type="submit" value="__MSG_Add__"
+		/>
 </form>
 <div id="remindersDiv__MODULE_ID__"></div>
 ]]>
