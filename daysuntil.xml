@@ -163,12 +163,14 @@
 	function createRow__MODULE_ID__(number, description, reminder_date) {
 		var now = new Date();
 		var daysuntil = calendarDaysUntil(reminder_date);
+		description = _hesc(description);
+		description = description.replace(/(\S{8,}?)/g, "$1<span class='break'>&nbsp;</span>")
 		
 		var html =
 			"<tr id=\"row" + number + "__MODULE_ID__\"" +
 			rowClass__MODULE_ID__(number) + ">" +
 			"<td class=description_td__MODULE_ID__><span class=description_ds__MODULE_ID__>" +
-			_hesc(description) +
+			description +
 			"</span></td>" +
 			"<td class=date_display__MODULE_ID__><div class=date_display__MODULE_ID__>" + 
 			daysuntil +
@@ -256,6 +258,13 @@
 		border: 0;
 		margin: 0;
 		padding: 0;
+	}
+
+	span.break {
+	font-size: 1px;
+	line-height: 1px;
+	float: right !important;
+	float: none;
 	}
 	
 </style>
