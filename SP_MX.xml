@@ -1,0 +1,8 @@
+<messagebundle>
+	<msg name="Add">Agregar</msg> 
+	<msg name="yourreminders"> Sus recordatorios</msg> 
+	<msg name="version">versión</msg>  
+	<msg name="daysuntil">Días que faltan</msg> 
+	<msg name="daysuntilcountdown"> Contador regresivo de los días que faltan</msg> 
+	<msg name="description"> ¿Cuánto falta para ese cumpleaños o esas vacaciones? ¿O cuánto falta para el lanzamiento de esa nueva cosa increíble? Use esto como un tipo de herramienta para la administración del tiempo, como recordatorio o como contador regresivo.</msg>
+</messagebundle>
