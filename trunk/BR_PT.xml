@@ -1,0 +1,8 @@
+<messagebundle>
+	<msg name="Add">Acrescentar</msg> 
+	<msg name="yourreminders"> Seus Lembradores</msg> 
+	<msg name="version">versão</msg>  
+	<msg name="daysuntil">Dias Até</msg> 
+	<msg name="daysuntilcountdown"> Contagem Regressiva de Dias Até</msg> 
+	<msg name="description"> Quantos dias até o seu aniversário ou férias? Ou quantos dias até aquela coisa nova legal acontecer? Use isso como um tipo de ferramenta de gerenciamento do tempo, lembrador, ou cronômetro de contagem regressiva.</msg>
+</messagebundle>
