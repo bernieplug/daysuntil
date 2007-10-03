@@ -19,6 +19,8 @@
 	author_link="http://leancode.com/"
 >
 	<Locale messages="http://daysuntil.googlecode.com/svn/trunk/ALL_ALL.xml"/>
+	<Locale lang="es" messages="http://daysuntil.googlecode.com/svn/trunk/es_ALL.xml"/>
+	<Locale lang="pt-BR" messages="http://daysuntil.googlecode.com/svn/trunk/pt_br_ALL.xml"/>
 	<Require feature="analytics"/>
 	<Require feature="setprefs"/>
 	<Require feature="dynamic-height"/>
