@@ -5,4 +5,6 @@
   <msg name="daysuntil">Days Until</msg>
   <msg name="daysuntilcountdown">Days Until Countdown</msg>
   <msg name="description">How long till that birthday or holiday? Or how long until that cool new thing comes out? Use this as a type of time management tool, reminder, or countdown timer.</msg>
+  <msg name="nospace">Can't add more reminders. iGoogle storage limit</msg>
+  <msg name="newrelated">NEW related widget</msg>
 </messagebundle>
