@@ -24,60 +24,190 @@
 	<Require feature="analytics"/>
 	<Require feature="setprefs"/>
 	<Require feature="dynamic-height"/>
+	<Require feature="minimessage" /> 
 </ModulePrefs>
 <UserPref name="reminders" display_name="__MSG_yourreminders__" datatype="string" default_value="[]"></UserPref>
-<UserPref name="version" display_name="__MSG_daysuntil__ __MSG_version__" datatype="string" default_value=" $Rev$ "></UserPref>
+<UserPref name="ver" display_name="__MSG_daysuntil__ __MSG_version__" datatype="string" default_value=""></UserPref>
 <Content type="html">
 <![CDATA[
 
-<script language="JavaScript" src="http://daysuntil.googlecode.com/svn/trunk/json.js"></script>
+<script language="JavaScript" src="http://dayssince.googlecode.com/svn/trunk/json_ori.js"></script>
 
 <script>
 	
-	var reminders__MODULE_ID__; // This is a json object of reminders (array of hashes with 'name' & 'date')
-	var prefs__MODULE_ID__;
-	var seconds = 1000;
-	var minutes = seconds*60;
+var daysUntil__MODULE_ID__ = function () {
+
+	// private attributes, methods, and initialization code
+
+	var minutes = 1000*60;
 	var hours = minutes*60;
 	var days = hours*24;
 	var years = days*365;
-	
-	_IG_RegisterOnloadHandler(onLoad__MODULE_ID__);
-	
-	function onLoad__MODULE_ID__() {
-		prefs__MODULE_ID__ = new _IG_Prefs(__MODULE_ID__);
-		loadReminders__MODULE_ID__();	
-	}
-		
-	function loadReminders__MODULE_ID__() {
-		var reminders = prefs__MODULE_ID__.getString("reminders");
-		
-		reminders__MODULE_ID__ = [];
-		
-		if (reminders != "") {
-			reminders__MODULE_ID__ = reminders.parseJSON(function (key, value) {
-			        return key == 'date' ? new Date(parseInt(value)) : value;
-			    });
+	var igPrefs;
+	var reminders;
+	var schemaUpgraded = false;
+
+	var DESC = 0;
+	var DATE = 1;
+
+	// message keys must start with 'msg' (to filter out other object attribs)
+	// just comment out messages that we don't want to display anymore
+	// don't delete them, because we can't ever reuse the keys (message #s)
+	// to add a new one, 
+	//   1. add to this list
+	//   2. add the appropriate strings to ALL locale files
+	//   3. add the preference name as a UserPref
+	var messages = {
+		// msg1: ""
+	};
+
+	function displayMessages() {
+		var mini = new _IG_MiniMessage(__MODULE_ID__);
+
+		for (var msg in messages) {
+			if ((msg.substring(0,3) == 'msg') && (igPrefs.getInt(msg) == 0)) {
+				mini.createDismissibleMessage(messages[msg], function () {
+				igPrefs.set(msg, "1");
+				return true;
+				});
+			}
 		}
-		
-		reminders__MODULE_ID__.sort(sortRemindersAscending);
-		resetForm__MODULE_ID__();
-		createTable__MODULE_ID__();
 	}
 
-	function saveReminders__MODULE_ID__(){
-		prefs__MODULE_ID__.set("reminders", reminders__MODULE_ID__.toJSONString());
-		//loadReminders__MODULE_ID__();
+	function decodeDates() {
+		for (var i = 0; i < reminders.length; i++) {
+			var d = reminders[i][DATE].match(/^(\d\d\d\d)-(\d\d)-(\d\d)T(\d\d):(\d\d):(\d\d)Z/);
+
+			if (d) {
+				reminders[i][DATE] = new Date(Date.UTC(d[1],d[2]-1,d[3],d[4],d[5],d[6]));
+			} else {
+				reminders[i][DATE] = new Date();
+			}
+		}
+	}
+
+	function loadReminders() {
+		var prefs = igPrefs.getString("reminders");
+
+		if (prefs != "") {
+			reminders = prefs.parseJSON();
+		}
+		upgradeSchema();
+		decodeDates();
+
+		if (schemaUpgraded) saveReminders();
+
+		createTable();
+	}
+
+	function upgradeSchema() {
+		if ((reminders.length > 0) && (reminders[0].name)) {
+			// old format stored in prefs. Upgrade to latest schema
+			var newr = [];
+
+			for (var i = 0; i < reminders.length; i++) {
+
+				// put the date in ISO string format that's now 
+				// what we expect when preferences are stored.
+				// we'll then convert back in decodeDates()
+				var d = new Date(parseInt(reminders[i].date));
+				d = d.toJSONString();
+				// toJSONString puts extra quotes around for eval(). Remove.
+				d = d.substring(1, d.length-1);
+				newr.push([
+					reminders[i].name,
+					d
+				]);
+			}
+			reminders = newr;
+			schemaUpgraded = true;
+		}
+	}
+
+	function saveReminders() {
+
+		// Because set() doesn't tell us about errors,
+		// we must enforce the current documented (2K) preference limit here.
+		var json = reminders.toJSONString();
+		var encoded = _esc(json);
+
+		// Approx 200 chars of overhead in the rest of Google's HTTP GET
+		// requests with all the preferences for our gadget
+		if (encoded.length < (2048 - 200)) {
+			igPrefs.set("reminders", json, "ver", "$Rev$");
+		} else {
+			var mini = new _IG_MiniMessage(__MODULE_ID__);
+			var lost = reminders.pop();
+
+			mini.createDismissibleMessage(lost[DESC] + ": " + "__MSG_nospace__");
+		}
+	}
+
+	function rowStyle(number) {
+		if (number % 2 != 0)
+			return "background: #F5F5DC";
+		else
+			return "";
 	}
 	
 	// a,b must be reminders (which have hashed 'name' and 'date' keys)
 	function sortRemindersAscending(a,b) {
-		var x = calendarDaysUntil(a.date);
-		var y = calendarDaysUntil(b.date);
+		var x = calendarDaysUntil(a[DATE]);
+		var y = calendarDaysUntil(b[DATE]);
 		
 		return ((x < y) ? -1 : ((x > y) ? 1 : 0));
 	}
 	
+	function createTable() {
+		var html = '<table cellspacing=0px cellpadding=2px id=remindersTable__MODULE_ID__ style="padding: 0; margin: 0">';
+		
+		reminders.sort(sortRemindersAscending);
+		
+		for (i = 0; i < reminders.length; i++) {
+			if (reminders[i] == null)
+				break;
+		
+			html = html + createRow(i, reminders[i][DESC], reminders[i][DATE]);
+		}
+		
+		html = html + '</table>';
+		_gel("remindersDiv__MODULE_ID__").innerHTML = html;
+		_IG_AdjustIFrameHeight();
+	}
+	
+	function createRow(number, description, reminder_date) {
+		var now = new Date();
+		var daysuntil = calendarDaysUntil(reminder_date);
+		description = description.replace(/(\S{8,}?)/g, 
+		'$1<wbr/><span style="font-size: 1px; line-height: 1px;' + 
+		'float: right !important; float: none;"> </span>');
+		
+		var html =
+			'<tr style="' + rowStyle(number) + '">' +
+			'<td style=\"text-align: center; padding 0px 2px 0px 2px; width: 100%\">' +
+			'<font size="-1"><p style="margin: 0 auto; padding: 0 5px 0 5px;' +
+			'word-wrap: break-word; width: 100%;">' + description +
+			'</p></font></td>' +
+			'<td style="text-align: right; padding 0px 2px 0px 2px;">' +
+			'<div style="border: 2px solid #003300; background-color: #33FF66; color: #003300;' +
+			'padding: 2px; margin: 0 2px; float: right;"><font size="-1">' + 
+			daysuntil +
+			'</font></div></td>' +
+			'<td>' + createDelete(number) +
+			'</td></tr>';
+
+		return html;
+	}
+
+	function createDelete(number) {
+		var img = _IG_GetImageUrl('http://daysuntil.googlecode.com/svn/trunk/x.gif');
+		var html =
+			'<a href="javascript:daysUntil__MODULE_ID__.deleteReminder(' + number + ')">' +
+			'<img style="border: 0; margin: 0 2px 0 4px; padding: 0;"' +
+			' src=\"' + img + '"></a>';
+		return html;
+	}
+
 	// returns integer with calendar days until the endDate
 	// (from the today's prior midnight, until the prior midnight of endDate)
 	// endDate is a Date object
@@ -103,175 +233,64 @@
 		return Math.ceil((endDay.getTime()-nowDay.getTime())/days);
 	}
 	
-	function resetForm__MODULE_ID__() {
+	function resetForm() {
 		var now = new Date();
-		
+
 		_gel("newYear__MODULE_ID__").value = now.getFullYear();
 		_gel("newMonth__MODULE_ID__").value = (now.getMonth()+1);
 		_gel("newDay__MODULE_ID__").value = now.getDate();
-	}
-
-	function addReminder__MODULE_ID__(description, year, month, day) {
-		var description = _trim(description);
-		var date = new Date(parseInt(year),parseInt(month)-1,parseInt(day));
-		
 		_gel("newDescription__MODULE_ID__").value = "";
-		if (description == "")
-			return;
-			
-		reminders__MODULE_ID__[reminders__MODULE_ID__.length] =
-			{"name": description, "date": date };
-			
-		saveReminders__MODULE_ID__();
-		createTable__MODULE_ID__();
-		return false;
 	}
 
-	function deleteReminder__MODULE_ID__(number) {
-		var beginning = reminders__MODULE_ID__.slice(0, number);
-		var end = reminders__MODULE_ID__.slice(number + 1,
-		                                      reminders__MODULE_ID__.length);
-		
-		reminders__MODULE_ID__ = beginning.concat(end);
-		saveReminders__MODULE_ID__();
-		createTable__MODULE_ID__();
-	}
-	
-	function rowClass__MODULE_ID__(number) {
-		if (number % 2 != 0)
-			return " class=odd__MODULE_ID__ ";
-		else
-			return " class=even__MODULE_ID__ ";
-	}
+	// return the "public" attributes and method closures of our object
 
-	function createTable__MODULE_ID__() {
-		var html = "<table cellspacing=2px id=remindersTable__MODULE_ID__>";
+	return {
+		onLoad : function() {
+			igPrefs = new _IG_Prefs(__MODULE_ID__);
+
+			loadReminders();
+			displayMessages();
+
+			resetForm();
+		},
+
+		addReminder : function(description, year, month, day) {
+			var description = _trim(description);
+			var date = new Date(parseInt(year),parseInt(month)-1,parseInt(day));
 		
-		for (i = 0; i < reminders__MODULE_ID__.length; i++) {
-			if (reminders__MODULE_ID__[i] == null)
-				break;
+			resetForm();
+			if (description == "")
+				return;
 			
-			var name = reminders__MODULE_ID__[i].name;
-			var date = reminders__MODULE_ID__[i].date;
-		
-			html = html + createRow__MODULE_ID__(i, name, date);
+			reminders.push([
+				description, 
+				date, 
+			]);
+			
+			saveReminders();
+			createTable();
+			return false;
+		},
+
+		deleteReminder: function(number) {
+			var beginning = reminders.slice(0, number);
+			var end = reminders.slice(number + 1, reminders.length);
+
+			reminders = beginning.concat(end);
+			saveReminders();
+			createTable();
 		}
-		
-		html = html + "</table>";
-		_gel("remindersDiv__MODULE_ID__").innerHTML = html;
-		_IG_AdjustIFrameHeight();
-	}
+	};
+}();
 
-	function createRow__MODULE_ID__(number, description, reminder_date) {
-		var now = new Date();
-		var daysuntil = calendarDaysUntil(reminder_date);
-		description = description.replace(/(\S{8,}?)/g, "$1<span class='break__MODULE_ID__'>&nbsp;</span>");
-		
-		var html =
-			"<tr id=\"row" + number + "__MODULE_ID__\"" +
-			rowClass__MODULE_ID__(number) + ">" +
-			"<td class=description_td__MODULE_ID__><span class=description_ds__MODULE_ID__>" +
-			description +
-			"</span></td>" +
-			"<td class=date_display__MODULE_ID__><div class=date_display__MODULE_ID__>" + 
-			daysuntil +
-			"</div></td>" +
-			"<td>" +
-			createDelete__MODULE_ID__(number) +
-			"</td>" +
-			"</tr>";
+_IG_RegisterOnloadHandler(daysUntil__MODULE_ID__.onLoad);
+_IG_Analytics("UA-99119-16", "/daysuntil");
 
-		return html;
-	}
-
-	function createDelete__MODULE_ID__(number) {
-		var img = _IG_GetImageUrl('http://daysuntil.googlecode.com/svn/trunk/x.gif');
-		var html =
-			"<a href=\"javascript:deleteReminder__MODULE_ID__(" + number + ")\">" +
-			"<img class=delete__MODULE_ID__" +
-			" src=\"" + img + "\">" +
-			"</a>";
-		return html;
-	}
-
-	function getRow__MODULE_ID__(number) {
-		return _gel("row" + number + "__MODULE_ID__");
-	}
-
-	function getCol__MODULE_ID__(row, index) {
-		return row.childNodes.item(index);
-	}
-
-	_IG_Analytics("UA-99119-12", "/daysuntil");
-	
 </script>
 
-<style type="text/css">
-
-	p { 
-		font-family: arial, sans-serif;
-		font-size: small;
-	}
-	
-	td.date_display__MODULE_ID__ {
-		text-align: right;
-		padding 0px 2px 0px 2px;
-	}
-	
-	td.description_td__MODULE_ID__ {
-		text-align: center;
-		width: 100%
-	}
-	
-	span.description_ds__MODULE_ID__ {
-
-		font-family: arial, sans-serif;
-		font-size: small;
-		margin: 0 auto;
-		padding: 0 5px 0 5px;
-	}
-	
-	div.date_display__MODULE_ID__ {
-		border: 2px solid #003300;
-		background-color: #33FF66;
-		color: #003300;
-		font-family: arial, san-serif;
-		font-size: normal;
-		font-weight: bold;
-		padding: 0px 2px 0px 2px;
-		margin: 0 2px;
-		float: right;
-	}
-	
-	img.delete__MODULE_ID__ {
-	    border: 0;
-		margin: 0 2px 0 10px;
-		padding: 0;
-	}
-	
-	form {
-		border: 0;
-		margin: 0;
-		padding: 0;
-	}
-	
-	div#remindersDiv__MODULE_ID__ {
-		border: 0;
-		margin: 0;
-		padding: 0;
-	}
-
-	span.break__MODULE_ID__ {
-	font-size: 1px;
-	line-height: 1px;
-	float: right !important;
-	float: none;
-	}
-	
-</style>
-
 <form name = "newReminderForm__MODULE_ID__"
-	onsubmit="return addReminder__MODULE_ID__(
+	style="padding: 0; margin: 0;"
+	onsubmit="return daysUntil__MODULE_ID__.addReminder(
 	document.newReminderForm__MODULE_ID__.
 	newDescription__MODULE_ID__.value,
 	newYear__MODULE_ID__.value,
