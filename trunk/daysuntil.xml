@@ -186,7 +186,9 @@ var daysUntil__MODULE_ID__ = function () {
 			'<tr style="' + rowStyle(number) + '">' +
 			'<td style=\"text-align: center; padding 0px 2px 0px 2px; width: 100%\">' +
 			'<font size="-1"><p style="margin: 0 auto; padding: 0 5px 0 5px;' +
-			'word-wrap: break-word; width: 100%;">' + description +
+			'word-wrap: break-word; width: 100%;" title="' + 
+			reminder_date.getFullYear() + '-' + (reminder_date.getMonth()+1) + '-' + 
+			reminder_date.getDate() + '">' + description +
 			'</p></font></td>' +
 			'<td style="text-align: right; padding 0px 2px 0px 2px;">' +
 			'<div style="border: 2px solid #003300; background-color: #33FF66; color: #003300;' +
@@ -215,22 +217,13 @@ var daysUntil__MODULE_ID__ = function () {
 	function calendarDaysUntil(endDate) {
 		var nowDate = new Date();
 		
-		// Roll clocks back to midnight
-		var endDay = new Date(endDate.getYear(), endDate.getMonth(), endDate.getDate());
-		var nowDay = new Date(nowDate.getYear(), nowDate.getMonth(), nowDate.getDate());
+		// Roll clocks back to prior midnight
+		var endDay = new Date(endDate.getFullYear(), endDate.getMonth(), endDate.getDate());
+		var nowDay = new Date(nowDate.getFullYear(), nowDate.getMonth(), nowDate.getDate());
 		
-		if (endDay.getTime() < nowDay.getTime()) {
-			// use date functions to avoid extra leap days, etc.
-			endDay.setFullYear(nowDay.getFullYear());
-			
-			// if endDay is in the past year to date, still
-			// need to go forward one additional year
-			if (endDay.getTime() < nowDay.getTime()) {
-				endDay.setFullYear(nowDay.getFullYear()+1);
-			}
-		}
+		endDay = setToFutureDay(endDay);
 		
-		return Math.ceil((endDay.getTime()-nowDay.getTime())/days);
+		return Math.round((endDay.getTime()-nowDay.getTime())/days);
 	}
 	
 	function resetForm() {
@@ -240,6 +233,28 @@ var daysUntil__MODULE_ID__ = function () {
 		_gel("newMonth__MODULE_ID__").value = (now.getMonth()+1);
 		_gel("newDay__MODULE_ID__").value = now.getDate();
 		_gel("newDescription__MODULE_ID__").value = "";
+	}
+	
+	// Given a (possibly) past date, move it to the future
+	// using annual recurrence
+	function setToFutureDay(d) {
+		var now = new Date();
+		
+		// just use ymd portion
+		var now = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+		
+		if (d.getTime() < now.getTime()) {
+
+			d.setFullYear(now.getFullYear());
+			
+			// if endDay is in the past year to date, still
+			// need to go forward one additional year
+			if (d.getTime() < now.getTime()) {
+				d.setFullYear(now.getFullYear()+1);
+			}
+		}
+		
+		return d;
 	}
 
 	// return the "public" attributes and method closures of our object
@@ -257,10 +272,13 @@ var daysUntil__MODULE_ID__ = function () {
 		addReminder : function(description, year, month, day) {
 			var description = _trim(description);
 			var date = new Date(parseInt(year),parseInt(month)-1,parseInt(day));
+			
+			setToFutureDay(date);
 		
+			if (description == "") {
+				return false;
+			}
 			resetForm();
-			if (description == "")
-				return;
 			
 			reminders.push([
 				description, 
