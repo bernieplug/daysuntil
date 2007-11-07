@@ -272,8 +272,6 @@ var daysUntil__MODULE_ID__ = function () {
 		addReminder : function(description, year, month, day) {
 			var description = _trim(description);
 			var date = new Date(parseInt(year),parseInt(month)-1,parseInt(day));
-			
-			setToFutureDay(date);
 		
 			if (description == "") {
 				return false;
